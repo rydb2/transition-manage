@@ -1,0 +1,28 @@
+{
+  "name": "translate-assembly",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "create-react-class": "^15.6.2",
+    "koa": "^2.3.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-logger": "^3.1.0",
+    "koa-router": "^7.2.1",
+    "koa-send": "^4.1.1",
+    "mongoose": "^4.11.13",
+    "raven": "^2.1.2",
+    "request-promise": "^4.2.2",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
+  "scripts": {
+    "dev": "NODE_ENV=dev ./node_modules/.bin/nodemon app.js --use_strict --ignore deploy/ --ignore node_modules/ --ignore public/ --ignore scripts --ignore asserts/ --ignore /*.json"
+  },
+  "repository": {},
+  "author": "",
+  "license": "ISC"
+}

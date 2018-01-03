@@ -6,6 +6,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "create-react-class": "^15.6.2",
+    "graphql-iso-date": "^3.3.0",
     "koa": "^2.3.0",
     "koa-bodyparser": "^4.2.0",
     "koa-logger": "^3.1.0",

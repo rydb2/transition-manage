@@ -60,28 +60,4 @@ schema.statics.deleteProjectKeywords = function(projectId) {
 
 const Keyword = mongoose.model('keywords`', schema);
 
-// instance methods
-
-/**
- * delete current doc
- * @returns {Promise}
- */
-Keyword.methods.delete = function() {
-  return this.model('keywords')
-    .deleteOne({_id: this._id}, {status: STATUS.DELETED})
-    .exec();
-};
-
-/**
- * update current doc
- * @param {String} content
- * @param {String} remark
- * @returns {Promise}
- */
-Keyword.methods.update = function({content, remark}) {
-  return this.model('keywords')
-    .updateOne({_id: this._id}, {content, remark})
-    .exec();
-},
-
 module.exports = Keyword;

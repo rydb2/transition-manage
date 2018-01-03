@@ -4,13 +4,14 @@ const Koa = require('koa');
 const exc = require('./exc');
 const logger = require('./logger');
 
+
 /*
   ;; middlewares
   logger
   error_catch
+  body parser
   router
   static_file
-  body parser
   params_validate
   // template (pug)
   returnType (custom middleware)
@@ -22,7 +23,7 @@ app.use(async function(ctx, next) {
   if (process.env.NODE_ENV === 'dev') {
     logger.info(ctx.request.url);
   }
-  next();
+  await next();
 });
 
 /* catch error */
@@ -44,6 +45,10 @@ app.use(async function (ctx, next) {
   }
 });
 
+/* use body parser */
+const bodyParser = require('koa-bodyparser');
+app.use(bodyParser());
+
 /* combine routes with koa-router */
 const router = require('./routes');
 app.use(router.routes());
@@ -51,12 +56,11 @@ app.use(router.routes());
 /* set static path use koa-send */
 const send = require('koa-send');
 app.use(async function (ctx) {
-  await send(ctx, ctx.path, {root: __dirname + '/public'});
+  if (ctx.path.startsWith('/public')) {
+    await send(ctx, ctx.path, {root: __dirname + '/public'});
+  }
 });
 
-/* use body parser */
-const bodyParser = require('koa-bodyparser');
-app.use(bodyParser());
 
 /* pug template engine */
 // var Pug = require('koa-pug');

@@ -5,10 +5,12 @@
 const mongoose = require('mongoose');
 const settings = require('../settings');
 
+mongoose.Promise = require('bluebird');
+
 //init mongodb
-// mongoose.connect(settings.MONGODB_DSN, {
-//   useMongoClient: true,
-// });
+mongoose.connect(settings.MONGODB_DSN, {
+  useMongoClient: true
+});
 
 // import models
 const Ticket = require('./ticket');

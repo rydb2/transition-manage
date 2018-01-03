@@ -1,11 +1,9 @@
 const Router = require('koa-router');
 
-const htmlRouter = require('./html.js');
-const apiRouter = require('./api.js');
+const projectRouter = require('./project');
 
 const router = new Router();
 
-router.use('/pages', htmlRouter.routes(), htmlRouter.allowedMethods());
-router.use('/api', apiRouter.routes(), apiRouter.allowedMethods());
+router.use('/projects', projectRouter.routes(), projectRouter.allowedMethods());
 
 module.exports = router;

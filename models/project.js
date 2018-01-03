@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const types = mongoose.Schema.Types;
 
-const exc = reuqire('../exc');
+const exc = require('../exc');
 const STATUS = require('../constants').STATUS;
 const Keyword = require('./keyword');
 
@@ -30,8 +30,7 @@ schema.index({status: 1});
 
 //static methods, call with Activity
 
-/**
- * upsert project
+/** * upsert project
  * @param {Object} doc
  * @param {String} doc.name
  * @param {String} doc.content
@@ -99,37 +98,6 @@ schema.statics.getByName = async function(name, {exception}) {
   return project;
 };
 
-// instance methods
-const Project = mongoose.model('projects`', schema);
+const Project = mongoose.model('projects', schema);
 
-/**
- * get project keywords
- * @returns {Promise}
- */
-Project.methods.getKeywords = function() {
-  return Keyword.getProjectKeywords(this._id);
-};
-
-/**
- * update project
- * @param {Object} doc
- * @param {String} doc.name
- * @param {String} doc.content
- * @returns {Promise}
- */
-Project.methods.update = function({name, desc}) {
-  return this.model('projects').update(
-    {_id: this._id},
-    {desc}
-  );
-};
-
-/**
- * delete project
- * @returns {Promise}
- */
-Project.methods.delete = function() {
-  return this.model('projects').deleteOne({_id: this._id});
-};
-
-module.exports = Keyword;
+module.exports = Project;

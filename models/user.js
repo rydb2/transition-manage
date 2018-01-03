@@ -11,6 +11,4 @@ schema.index({});
 
 //static methods, call with Activity
 
-// instance methods
-
 module.exports = User;

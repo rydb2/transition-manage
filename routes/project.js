@@ -1,3 +1,10 @@
+const graphqlTools = require('graphql-tools');
+const makeExecutableSchema = graphqlTools.makeExecutableSchema;
+
+const graphqlKoa = require('apollo-server-koa').graphqlKoa ;
+const graphiqlKoa = require('apollo-server-koa').graphiqlKoa ;
+const GraphQLDate = require('graphql-iso-date').GraphQLDate;
+
 const Router = require('koa-router');
 
 const exc = require('../exc');
@@ -7,76 +14,65 @@ const db = require('../models');
 
 const project = new Router();
 
-async function getProjects(ctx) {
-  const args = ctx.args;
-  return await db.Project.getAll();
-}
+const typeDefs = `
+  scalar GraphQLDate
 
-project.get(
-  '/projects',
-  getProjects
-);
+  type Query {
+    project(name: String): Project
+    allProjects: [Project]
+  }
 
-async function createProject(ctx) {
-  const args = ctx.args;
-  await db.Project.create(...args);
-  return ctx.status = 201;
-}
+  type Project {
+    _id: String,
+    name: String,
+    desc: String,
+    languages: [String],
+    ctime: GraphQLDate,
+    utime: GraphQLDate,
+    version: Int
+  }
 
-project.post(
-  '/projects',
-  vld({
-    name: {type: 'string', required: true},
-    desc: {type: 'string'}
-  }),
-);
+  type Mutation {
+    createProject(name: String, desc: String): Project
+  }
 
-async function getProjectByName(ctx) {
-  const args = ctx.args;
-  return await db.Project.getByName(ctx.name);
-}
+  schema {
+    query: Query
+    mutation: Mutation
+  }
 
-project.get(
-  '/projects/:name',
-  vld({
-    name: {type: 'string', required: true}
-  }),
-  responseJson(),
-  getProjectById
-);
+`;
 
-async function updateProject(ctx) {
-  const project = await db.Project.getByName(
-    ctx.name,
-    new exc.CommonError(exc.Code.PROJECT_NOT_EXIST)
-  );
-  return await project.update({
-    desc: ctx.desc
-  });
-}
+const resolvers = {
+  Query: {
+    project: async (name) => {
+      return await db.Project.getByName(name);
+    },
+    allProjects: async () => {
+      return await db.Project.getAll();
+    }
+  },
+  Mutation: {
+    createProject: async (name, desc) => {
+      return await db.Project.create({name, desc});
+    }
+  }
+};
 
-project.put(
-  '/projects/:name',
-  vld({
-    name: {type: 'string', required: true},
-    desc: {type: 'string'}
-  }),
-  responseJson(),
-  updateProject
-);
+const schema = makeExecutableSchema({
+  typeDefs,
+  resolvers
+});
 
-async function deleteProject(ctx) {
-  const project = await db.Project.getByName(
-    ctx.name,
-    new exc.CommonError(exc.Code.PROJECT_NOT_EXIST)
-  );
-  return await project.delete();
-}
+project.get('/', graphqlKoa({ schema }));
+project.post('/', graphqlKoa({ schema }));
+project.get('/graphiql', graphiqlKoa({
+  endpointURL: '/projects' // a POST endpoint that GraphiQL will make the actual requests to
+}));
 
-project.delete(
-  '/projects/:name',
-  vld({
-    name: {type: 'string', required: true}
-  }),
-  deleteProject
-);
+project.get('/test', async function(ctx) {
+  ctx.body = 'test';
+});
+
+module.exports = project;
+

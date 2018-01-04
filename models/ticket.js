@@ -19,7 +19,5 @@ const Ticket = mongoose.model('users', schema);
 schema.index({});
 
 //static methods, call with Activity
-schema.statics.get_by_site_id = function(site_id){
-};
 
 module.exports = Ticket;

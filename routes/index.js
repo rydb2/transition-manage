@@ -4,6 +4,6 @@ const projectRouter = require('./project');
 
 const router = new Router();
 
-router.use('/projects', projectRouter.routes(), projectRouter.allowedMethods());
+router.use('/', projectRouter.routes(), projectRouter.allowedMethods());
 
 module.exports = router;

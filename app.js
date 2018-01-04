@@ -3,12 +3,13 @@
 const Koa = require('koa');
 const exc = require('./exc');
 const logger = require('./logger');
-
+const settings = require('./settings');
 
 /*
   ;; middlewares
   logger
   error_catch
+  cors
   body parser
   router
   static_file
@@ -45,6 +46,13 @@ app.use(async function (ctx, next) {
   }
 });
 
+const cors = require('@koa/cors');
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors(settings.CORS));
+} else {
+  app.use(cors());
+}
+
 /* use body parser */
 const bodyParser = require('koa-bodyparser');
 app.use(bodyParser());
@@ -75,7 +83,7 @@ app.use(async function (ctx) {
 // });
 
 /* start listen */
-const port = process.env.NODE_PORT || 3000;
+const port = process.env.NODE_PORT || 3200;
 app.listen(port, function (err) {
   if (!err) console.log('愿世间永无Bug  ( ゜- ゜)つロ');
 });

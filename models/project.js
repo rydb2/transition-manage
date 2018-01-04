@@ -19,7 +19,7 @@ let schema = mongoose.Schema({
   status: {type: Number, default: STATUS.NORMAL},
 
   ctime: {type: Date, default: Date.now},
-  utime: Date,
+  utime: {type: Date, default: Date.now},
   version: {type: Number, default: 1}
 });
 
@@ -31,24 +31,24 @@ schema.index({status: 1});
 //static methods, call with Activity
 
 /** * upsert project
- * @param {Object} doc
- * @param {String} doc.name
- * @param {String} doc.content
- * @param {String} doc.remark
- * @returns {}
+ * @param   {Object}   doc
+ * @prop    {String}   doc.name
+ * @prop    {String}   doc.content
+ * @prop    {String}   doc.remark
+ * @returns {Promise.<Project>}
  */
 schema.statics.upsert = function({name, desc}) {
   return this.findOneAndUpdate(
     { name, status: STATUS.NORMAL },
     { desc, utime: Date.now()},
     { upsert: true, new: true }
-  ).exec();
+  );
 };
 
 /**
  * create new project
- * @param {String} name
- * @param {String} desc
+ * @param   {String}    name
+ * @param   {String}    desc
  * @returns {Project}
  */
 schema.statics.create = async function({name, desc}) {
@@ -60,7 +60,8 @@ schema.statics.create = async function({name, desc}) {
   if (exist) {
     throw new exc.CommonError(exc.Code.PROJECT_ALREADY_EXIST);
   }
-  return await project.save();
+  await project.save();
+  return project;
 };
 
 /**
@@ -77,7 +78,7 @@ schema.statics.delete = function(id) {
 
 /**
  * get all projects status is normal
- * @returns {Promise}
+ * @returns {Promise.<Array.<Project>>}
  */
 schema.statics.getAll = function() {
   return this.find({status: 1});
@@ -85,14 +86,14 @@ schema.statics.getAll = function() {
 
 /**
  * get project by _id
- * @param {ObjectId} id
- * @param {Object} opts
- * @param {Error} opts.exception - when not found throw error
+ * @param   {ObjectId}  id
+ * @param   {Object}    opts
+ * @prop    {Error}     opts.exception - when not found throw error
  * @returns {Project}
  */
-schema.statics.getByName = async function(name, {exception}) {
+schema.statics.getByName = async function(name, opts = {exception: null}) {
   const project = await this.findOne({name: name, status: STATUS.NORMAL});
-  if (!project && exception) {
+  if (!project && opts.exception) {
     throw exception;
   }
   return project;

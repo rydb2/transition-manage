@@ -2,7 +2,6 @@ const graphqlTools = require('graphql-tools');
 const makeExecutableSchema = graphqlTools.makeExecutableSchema;
 
 const graphqlKoa = require('apollo-server-koa').graphqlKoa ;
-const graphiqlKoa = require('apollo-server-koa').graphiqlKoa ;
 const GraphQLDate = require('graphql-iso-date').GraphQLDate;
 
 const Router = require('koa-router');
@@ -12,7 +11,9 @@ const vld = require('../middlewares/vld');
 const responseJson = require('../middlewares/responseType').responseJson;
 const db = require('../models');
 
-const project = new Router();
+const project = new Router({
+  prefix: 'projects'
+});
 
 const typeDefs = `
   scalar GraphQLDate
@@ -53,7 +54,7 @@ const resolvers = {
     }
   },
   Mutation: {
-    createProject: async (name, desc) => {
+    createProject: async (root, {name, desc}) => {
       return await db.Project.create({name, desc});
     }
   }
@@ -66,13 +67,13 @@ const schema = makeExecutableSchema({
 
 project.get('/', graphqlKoa({ schema }));
 project.post('/', graphqlKoa({ schema }));
-project.get('/graphiql', graphiqlKoa({
-  endpointURL: '/projects' // a POST endpoint that GraphiQL will make the actual requests to
-}));
 
-project.get('/test', async function(ctx) {
-  ctx.body = 'test';
-});
+if (process.env.NODE_ENV !== 'production') {
+  const graphiqlKoa = require('apollo-server-koa').graphiqlKoa ;
+  project.get('/graphiql', graphiqlKoa({
+    endpointURL: '/projects' // a POST endpoint that GraphiQL will make the actual requests to
+  }));
+}
 
 module.exports = project;
 

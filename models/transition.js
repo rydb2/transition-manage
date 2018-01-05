@@ -28,9 +28,9 @@ schema.index({projectId: 1, keyword: 1, status: 1});
  * update project keyword, create new when key not exists
  * @param    {ObjectId}   projectId
  * @param    {Object}     doc
- * @prop     {String}     doc.key
- * @prop     {String}     doc.content
- * @prop     {String}     doc.remark
+ * @param    {String}     doc.key
+ * @param    {String}     doc.content
+ * @param    {String}     doc.remark
  * @returns  {Promise}
  */
 schema.statics.upsert = function(projectId, {key, content, remark}) {

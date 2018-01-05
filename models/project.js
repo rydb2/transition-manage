@@ -32,9 +32,9 @@ schema.index({status: 1});
 
 /** * upsert project
  * @param   {Object}   doc
- * @prop    {String}   doc.name
- * @prop    {String}   doc.content
- * @prop    {String}   doc.remark
+ * @param   {String}   doc.name
+ * @param   {String}   doc.content
+ * @param   {String}   doc.remark
  * @returns {Promise.<Project>}
  */
 schema.statics.upsert = function({name, desc}) {
@@ -88,7 +88,7 @@ schema.statics.getAll = function() {
  * get project by _id
  * @param   {ObjectId}  id
  * @param   {Object}    opts
- * @prop    {Error}     opts.exception - when not found throw error
+ * @param   {Error}     opts.exception - when not found throw error
  * @returns {Project}
  */
 schema.statics.getByName = async function(name, opts = {exception: null}) {

@@ -83,6 +83,7 @@ class ApiRequestError extends BaseError {
 module.exports = {
   Code,
   BaseError,
+  CommonError,
   PermissionError,
   AuthError,
   InputError,

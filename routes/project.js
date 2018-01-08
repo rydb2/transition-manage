@@ -1,14 +1,19 @@
-const graphqlTools = require('graphql-tools');
-const makeExecutableSchema = graphqlTools.makeExecutableSchema;
-
-const graphqlKoa = require('apollo-server-koa').graphqlKoa ;
-const GraphQLDate = require('graphql-iso-date').GraphQLDate;
-
+const { makeExecutableSchema } = require('graphql-tools');
+const { graphqlKoa } = require('apollo-server-koa');
+const { GraphQLDate } = require('graphql-iso-date');
+// const {
+//   graphql,
+//   GraphQLObjectType,
+//   GraphQLSchema,
+//   GraphQLString,
+//   GraphQLInt,
+//   GraphQLList
+// } = require('graphql');
 const Router = require('koa-router');
 
 const exc = require('../exc');
 const vld = require('../middlewares/vld');
-const responseJson = require('../middlewares/responseType').responseJson;
+const { responseJson } = require('../middlewares/responseType');
 const db = require('../models');
 
 const project = new Router({
@@ -46,7 +51,7 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-    project: async (name) => {
+    project: async (root, {name}) => {
       return await db.Project.getByName(name);
     },
     allProjects: async () => {
@@ -64,6 +69,43 @@ const schema = makeExecutableSchema({
   typeDefs,
   resolvers
 });
+
+/* use graphql js example. personally, I think it's not elegant */
+/*
+const ProjectType = new GraphQLObjectType({
+  name: 'Project',
+  fields: {
+    _id: { type: GraphQLString },
+    name: { type: GraphQLString },
+    desc: { type: GraphQLString },
+    languages: { type: GraphQLList(GraphQLString) },
+    ctime: { type: GraphQLDate },
+    utime: { type: GraphQLDate },
+    version: { type: GraphQLInt }
+  }
+});
+
+const QueryType = new GraphQLObjectType({
+  name: 'Query',
+  fields: {
+    project: {
+      type: ProjectType,
+      args: {
+        name: {
+          type: GraphQLString
+        }
+      },
+      resolve: async function(args, {name}, info) {
+        return await db.Project.getByName(name);
+      }
+    }
+  }
+});
+
+const schema = new GraphQLSchema({
+  query: QueryType
+});
+*/
 
 project.get('/', graphqlKoa({ schema }));
 project.post('/', graphqlKoa({ schema }));

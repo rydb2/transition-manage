@@ -37,10 +37,15 @@ schema.index({status: 1});
  * @param   {String}   doc.remark
  * @returns {Promise.<Project>}
  */
-schema.statics.upsert = function({name, desc}) {
+schema.statics.upsert = function({name, desc, languages}) {
+  if (languages) {
+    languages = languages.map(each => {
+      return each.trim().substring(0, 20);
+    })
+  }
   return this.findOneAndUpdate(
-    { name, status: STATUS.NORMAL },
-    { desc, utime: Date.now()},
+    { name, status: STATUS.NORMAL},
+    { desc, languages, utime: Date.now()},
     { upsert: true, new: true }
   );
 };

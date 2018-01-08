@@ -40,6 +40,7 @@ const typeDefs = `
 
   type Mutation {
     createProject(name: String, desc: String): Project
+    updateProject(name: String, desc: String, languages: [String]): Project
   }
 
   schema {
@@ -61,6 +62,9 @@ const resolvers = {
   Mutation: {
     createProject: async (root, {name, desc}) => {
       return await db.Project.create({name, desc});
+    },
+    updateProject: async (root, {name, desc, languages}) => {
+      return await db.Project.upsert({name, desc, languages});
     }
   }
 };

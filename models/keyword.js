@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const exc = require('../exc');
 const types = mongoose.Schema.Types;
 
 const STATUS = require('../constants').STATUS;
@@ -7,13 +8,13 @@ const STATUS = require('../constants').STATUS;
 let schema = mongoose.Schema({
   projectId: types.ObjectId,
   key: String,
-  content: String,
-  remark: {type: String, default: ''},
-  status: {type: Number},
+  content: String,                                    // keywords value
+  remark: {type: String, default: ''},                // keywords desc
+  status: {type: Number, default: STATUS.NORMAL},
+  version: {type: Number, default: 1},
 
   ctime: {type: Date, default: Date.now},
   utime: Date,
-  version: {type: Number, default: 1}
 });
 
 
@@ -32,12 +33,35 @@ schema.index({projectId: 1, key: 1, status: 1});
  * @param   {String}      doc.remark
  * @returns {Promise}
  */
-schema.statics.upsert = function(projectId, {key, content, remark}) {
+schema.statics.upsert = function(id, {key, content, remark}) {
   return this.findOneAndUpdate(
-    { projectId, key },
+    { _id: id, key, status: STATUS.NORMAL },
     { key, content, remark, utime: Date.now()},
     { upsert: true, new: true }
   ).exec();
+};
+
+/**
+ * create keyword
+ * @param {ObjectId}     projectId
+ * @param {String}       key
+ * @param {String}       content
+ * @param {String}       remark
+ * @returns {Keyword}
+ */
+schema.statics.create = async function({projectId, key, content, remark}) {
+  const keyword = await this.findOne({projectId, key, status: STATUS.NORMAL});
+  if (keyword) {
+    throw new exc.PermissionError(exc.Code.KEYWORD_ALREADY_EXIST);
+  }
+  const newKeyword = new Keyword({
+    projectId,
+    key,
+    content,
+    remark
+  });
+  await newKeyword.save();
+  return newKeyword;
 };
 
 /**
@@ -46,7 +70,7 @@ schema.statics.upsert = function(projectId, {key, content, remark}) {
  * @returns {Promise}
  */
 schema.statics.getProjectKeywords = function(projectId) {
-  return this.find({projectId}).exec();
+  return this.find({projectId});
 };
 
 /**
@@ -55,7 +79,7 @@ schema.statics.getProjectKeywords = function(projectId) {
  * @returns   {Promise}
  */
 schema.statics.deleteProjectKeywords = function(projectId) {
-  return this.updateMany({projectId}, {status: STATUS.DELETED}).exec();
+  return this.updateMany({projectId}, {status: STATUS.DELETED});
 };
 
 const Keyword = mongoose.model('keywords`', schema);

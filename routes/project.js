@@ -1,3 +1,4 @@
+const {ObjectId} = require('mongoose').Types;
 const { makeExecutableSchema } = require('graphql-tools');
 const { graphqlKoa } = require('apollo-server-koa');
 const { GraphQLDate } = require('graphql-iso-date');
@@ -24,7 +25,7 @@ const typeDefs = `
   scalar GraphQLDate
 
   type Query {
-    project(name: String): Project
+    project(id: String): Project
     allProjects: [Project]
   }
 
@@ -40,7 +41,7 @@ const typeDefs = `
 
   type Mutation {
     createProject(name: String, desc: String): Project
-    updateProject(name: String, desc: String, languages: [String]): Project
+    updateProject(id:String, name: String, desc: String, languages: [String]): Project
   }
 
   schema {
@@ -52,8 +53,8 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-    project: async (root, {name}) => {
-      return await db.Project.getByName(name);
+    project: async (root, {id}) => {
+      return await db.Project.getById(ObjectId(id));
     },
     allProjects: async () => {
       return await db.Project.getAll();
@@ -63,11 +64,12 @@ const resolvers = {
     createProject: async (root, {name, desc}) => {
       return await db.Project.create({name, desc});
     },
-    updateProject: async (root, {name, desc, languages}) => {
-      return await db.Project.upsert({name, desc, languages});
+    updateProject: async (root, {id, name, desc, languages}) => {
+      return await db.Project.upsert(ObjectId(id), {name, desc, languages});
     }
   }
-};
+}
+
 
 const schema = makeExecutableSchema({
   typeDefs,

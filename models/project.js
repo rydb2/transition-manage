@@ -25,27 +25,27 @@ let schema = mongoose.Schema({
 
 
 //indexes, every query needs index
-schema.index({name: 1, status: 1});
-schema.index({status: 1});
+schema.index({_id: 1, status: 1});
 
 //static methods, call with Activity
 
 /** * upsert project
+ * @param   {ObjectId} id
  * @param   {Object}   doc
  * @param   {String}   doc.name
  * @param   {String}   doc.content
  * @param   {String}   doc.remark
  * @returns {Promise.<Project>}
  */
-schema.statics.upsert = function({name, desc, languages}) {
+schema.statics.upsert = function(id, {name, desc, languages}) {
   if (languages) {
     languages = languages.map(each => {
       return each.trim().substring(0, 20);
-    })
+    });
   }
   return this.findOneAndUpdate(
-    { name, status: STATUS.NORMAL},
-    { desc, languages, utime: Date.now()},
+    { _id: id, status: STATUS.NORMAL},
+    { name, desc, languages, utime: Date.now()},
     { upsert: true, new: true }
   );
 };
@@ -61,10 +61,6 @@ schema.statics.create = async function({name, desc}) {
     name,
     desc
   });
-  const exist = !!await this.getByName(name);
-  if (exist) {
-    throw new exc.CommonError(exc.Code.PROJECT_ALREADY_EXIST);
-  }
   await project.save();
   return project;
 };
@@ -76,8 +72,8 @@ schema.statics.create = async function({name, desc}) {
  */
 schema.statics.delete = function(id) {
   return Promise.all([
-    Keyword.deleteProjectKeywords(this._id),
-    this.deleteOne({_id: this._id}, {status: STATUS.DELETED})
+    Keyword.deleteProjectKeywords(id),
+    this.update({id}, {status: STATUS.DELETED})
   ]);
 };
 
@@ -96,13 +92,13 @@ schema.statics.getAll = function() {
  * @param   {Error}     opts.exception - when not found throw error
  * @returns {Project}
  */
-schema.statics.getByName = async function(name, opts = {exception: null}) {
-  const project = await this.findOne({name: name, status: STATUS.NORMAL});
+schema.statics.getById = async function(id, opts = {exception: null}) {
+  const project = await this.findOne({_id: id, status: STATUS.NORMAL});
   if (!project && opts.exception) {
     throw exception;
   }
   return project;
-};
+}
 
 const Project = mongoose.model('projects', schema);
 

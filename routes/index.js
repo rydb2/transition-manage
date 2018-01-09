@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 
-const projectRouter = require('./project');
+const projectRouter = require('./projects');
 
 const router = new Router();
 

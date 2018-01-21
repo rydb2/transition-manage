@@ -14,7 +14,7 @@ let schema = mongoose.Schema({
   version: {type: Number, default: 1},
 
   ctime: {type: Date, default: Date.now},
-  utime: Date,
+  utime: {type: Date, default: Date.now},
 });
 
 

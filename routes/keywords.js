@@ -46,6 +46,7 @@ const resolvers = {
     }
   },
   Mutation: {
+    // for dev
     newKeyword: async (root, {projectId, key, content, remark}) => {
       return await db.Keyword.create({
         projectId: ObjectId(projectId),

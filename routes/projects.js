@@ -38,7 +38,7 @@ const typeDefs = `
   }
 
   type Mutation {
-    newProject(name: String, desc: String): Project
+    newProject(name: String, desc: String, defaultLanguage: String): Project
     updateProject(id:String, name: String, desc: String, languages: [String]): Project
   }
 
@@ -59,8 +59,9 @@ const resolvers = {
     }
   },
   Mutation: {
-    newProject: async (root, {name, desc}) => {
-      return await db.Project.create({name, desc});
+    newProject: async (root, {name, desc, defaultLanguage}) => {
+      console.log(defaultLanguage);
+      return await db.Project.create({name, desc, defaultLanguage});
     },
     updateProject: async (root, {id, name, desc, languages}) => {
       return await db.Project.upsert(ObjectId(id), {name, desc, languages});

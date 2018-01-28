@@ -9,13 +9,9 @@ const Keyword = require('./keyword');
 let schema = mongoose.Schema({
   name: String,
   desc: String,
-  /*
-    {
-      key,  // used to diff different language
-      name  // frontend show name
-    }
-   */
-  languages: [{}],
+  defaultLanguage: String,
+
+  languages: [String],
   status: {type: Number, default: STATUS.NORMAL},
 
   ctime: {type: Date, default: Date.now},
@@ -54,12 +50,15 @@ schema.statics.upsert = function(id, {name, desc, languages}) {
  * create new project
  * @param   {String}    name
  * @param   {String}    desc
+ * @param   {String}    defaultLanguage
  * @returns {Project}
  */
-schema.statics.create = async function({name, desc}) {
+schema.statics.create = async function({name, desc, defaultLanguage}) {
   const project = new Project({
     name,
-    desc
+    desc,
+    defaultLanguage,
+    languages: [defaultLanguage]
   });
   await project.save();
   return project;

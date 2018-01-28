@@ -7,6 +7,7 @@ const STATUS = require('../constants').STATUS;
 // collection definition
 let schema = mongoose.Schema({
   projectId: types.ObjectId,
+  language: String,                                   // project language
   key: String,
   content: String,                                    // keywords value
   remark: {type: String, default: ''},                // keywords desc

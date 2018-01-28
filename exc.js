@@ -14,7 +14,9 @@ const codes = {
   JSON_INVALID: [30003, 'JSON invalid'],
 
   PROJECT_NOT_EXIST: [40001, 'project not exist'],
-  PROJECT_ALREADY_EXIST: [40002, 'project already exist']
+  PROJECT_ALREADY_EXIST: [40002, 'project already exist'],
+
+  KEYWORD_ALREADY_EXIST: [50001, 'keyword already exist'],
 };
 
 const Code = (function () {
@@ -83,6 +85,7 @@ class ApiRequestError extends BaseError {
 module.exports = {
   Code,
   BaseError,
+  CommonError,
   PermissionError,
   AuthError,
   InputError,
@@ -91,4 +94,4 @@ module.exports = {
   ParamsError,
   ParamsNotExisted,
   RangeError
-}
+};

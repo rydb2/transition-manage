@@ -10,7 +10,10 @@ const config = {
   },
   dev: {
     LOG_LEVEL: 'debug',
-    MONGODB_DSN: ''
+    MONGODB_DSN: 'mongodb://127.0.0.1:27017/transition',
+    CORS: {
+      credentials: 'Access-Control-Allow-Credentials'
+    }
   },
 };
 

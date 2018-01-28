@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const types = mongoose.Schema.Types;
 
-const exc = reuqire('../exc');
+const exc = require('../exc');
 const STATUS = require('../constants').STATUS;
 const Keyword = require('./keyword');
 
@@ -9,59 +9,59 @@ const Keyword = require('./keyword');
 let schema = mongoose.Schema({
   name: String,
   desc: String,
-  /*
-    {
-      key,  // used to diff different language
-      name  // frontend show name
-    }
-   */
-  languages: [{}],
+  defaultLanguage: String,
+
+  languages: [String],
   status: {type: Number, default: STATUS.NORMAL},
 
   ctime: {type: Date, default: Date.now},
-  utime: Date,
+  utime: {type: Date, default: Date.now},
   version: {type: Number, default: 1}
 });
 
 
 //indexes, every query needs index
-schema.index({name: 1, status: 1});
-schema.index({status: 1});
+schema.index({_id: 1, status: 1});
 
 //static methods, call with Activity
 
-/**
- * upsert project
- * @param {Object} doc
- * @param {String} doc.name
- * @param {String} doc.content
- * @param {String} doc.remark
- * @returns {}
+/** * upsert project
+ * @param   {ObjectId} id
+ * @param   {Object}   doc
+ * @param   {String}   doc.name
+ * @param   {String}   doc.content
+ * @param   {String}   doc.remark
+ * @returns {Promise.<Project>}
  */
-schema.statics.upsert = function({name, desc}) {
+schema.statics.upsert = function(id, {name, desc, languages}) {
+  if (languages) {
+    languages = languages.map(each => {
+      return each.trim().substring(0, 20);
+    });
+  }
   return this.findOneAndUpdate(
-    { name, status: STATUS.NORMAL },
-    { desc, utime: Date.now()},
+    { _id: id, status: STATUS.NORMAL},
+    { name, desc, languages, utime: Date.now()},
     { upsert: true, new: true }
-  ).exec();
+  );
 };
 
 /**
  * create new project
- * @param {String} name
- * @param {String} desc
+ * @param   {String}    name
+ * @param   {String}    desc
+ * @param   {String}    defaultLanguage
  * @returns {Project}
  */
-schema.statics.create = async function({name, desc}) {
+schema.statics.create = async function({name, desc, defaultLanguage}) {
   const project = new Project({
     name,
-    desc
+    desc,
+    defaultLanguage,
+    languages: [defaultLanguage]
   });
-  const exist = !!await this.getByName(name);
-  if (exist) {
-    throw new exc.CommonError(exc.Code.PROJECT_ALREADY_EXIST);
-  }
-  return await project.save();
+  await project.save();
+  return project;
 };
 
 /**
@@ -71,14 +71,14 @@ schema.statics.create = async function({name, desc}) {
  */
 schema.statics.delete = function(id) {
   return Promise.all([
-    Keyword.deleteProjectKeywords(this._id),
-    this.deleteOne({_id: this._id}, {status: STATUS.DELETED})
+    Keyword.deleteProjectKeywords(id),
+    this.update({id}, {status: STATUS.DELETED})
   ]);
 };
 
 /**
  * get all projects status is normal
- * @returns {Promise}
+ * @returns {Promise.<Array.<Project>>}
  */
 schema.statics.getAll = function() {
   return this.find({status: 1});
@@ -86,50 +86,19 @@ schema.statics.getAll = function() {
 
 /**
  * get project by _id
- * @param {ObjectId} id
- * @param {Object} opts
- * @param {Error} opts.exception - when not found throw error
+ * @param   {ObjectId}  id
+ * @param   {Object}    opts
+ * @param   {Error}     opts.exception - when not found throw error
  * @returns {Project}
  */
-schema.statics.getByName = async function(name, {exception}) {
-  const project = await this.findOne({name: name, status: STATUS.NORMAL});
-  if (!project && exception) {
+schema.statics.getById = async function(id, opts = {exception: null}) {
+  const project = await this.findOne({_id: id, status: STATUS.NORMAL});
+  if (!project && opts.exception) {
     throw exception;
   }
   return project;
-};
+}
 
-// instance methods
-const Project = mongoose.model('projects`', schema);
+const Project = mongoose.model('projects', schema);
 
-/**
- * get project keywords
- * @returns {Promise}
- */
-Project.methods.getKeywords = function() {
-  return Keyword.getProjectKeywords(this._id);
-};
-
-/**
- * update project
- * @param {Object} doc
- * @param {String} doc.name
- * @param {String} doc.content
- * @returns {Promise}
- */
-Project.methods.update = function({name, desc}) {
-  return this.model('projects').update(
-    {_id: this._id},
-    {desc}
-  );
-};
-
-/**
- * delete project
- * @returns {Promise}
- */
-Project.methods.delete = function() {
-  return this.model('projects').deleteOne({_id: this._id});
-};
-
-module.exports = Keyword;
+module.exports = Project;

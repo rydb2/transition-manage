@@ -1,0 +1,6 @@
+{:require [app.main]
+ :init-fns [app.main/init]
+ :compiler-options {:foreign-libs [{:file "fonts/roboto/Roboto-Bold.woff"
+                                    :provides ["org.webjars/materializecss"]}]
+                    :externs ["fonts/main.woff"]}
+ :language-out :ecmascript6-strict}

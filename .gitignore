@@ -8,3 +8,16 @@ node_modules/
 \#* 
 .\#*
 .nrepl-history
+dist
+build
+.DS_Store
+.idea/
+*.tgz
+*.swp
+node_modules/
+\#* 
+.\#*
+target/
+.nrepl-history
+.nrepl-port
+project.clj
